@@ -10,6 +10,7 @@
     
     <title>VoltLog</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Graphiques (Charts) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -20,154 +21,176 @@
 </head>
 <body class="bg-[#f2f2f7] dark:bg-[#1c1c1e] text-black dark:text-white antialiased flex flex-col h-full overflow-hidden pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
 
-    <div class="flex-1 overflow-y-auto no-scrollbar pb-20" id="contenu-principal">
+    <!-- CONTENU PRINCIPAL (Équivalent du TabView) -->
+    <div class="flex-1 overflow-y-auto no-scrollbar pb-24" id="contenu-principal">
         
+        <!-- ONGLET 0 : HISTORIQUE -->
         <div id="onglet-historique" class="block space-y-6">
-            <header class="sticky top-0 bg-[#f2f2f7]/80 dark:bg-[#1c1c1e]/80 backdrop-blur-md z-30 px-4 h-16 flex justify-between items-center border-b border-black/5 dark:border-white/5">
-                <button onclick="ouvrirReglages()" class="text-blue-500 text-2xl p-3">⚙️</button>
-                <h1 class="text-xl font-black tracking-tight">VoltLog</h1>
-                <button onclick="ouvrirEditeur()" class="text-blue-500 text-3xl p-3">➕</button>
+            <!-- Barre d'outils supérieure MASSIVE -->
+            <header class="sticky top-0 bg-[#f2f2f7]/90 dark:bg-[#1c1c1e]/90 backdrop-blur-md z-30 px-4 h-20 flex justify-between items-center border-b-2 border-black/10 dark:border-white/10">
+                <button onclick="ouvrirReglages()" class="text-blue-500 text-3xl p-3 bg-white dark:bg-[#2c2c2e] rounded-xl shadow-xs">⚙️</button>
+                <h1 class="text-2xl font-black tracking-tight">VoltLog</h1>
+                <button onclick="ouvrirEditeur()" class="text-blue-500 text-4xl p-2 px-4 bg-blue-500 text-white rounded-xl shadow-xs">➕</button>
             </header>
 
-            <div class="px-4 space-y-6">
+            <!-- Liste des Recharges à TRÈS GROS caractères -->
+            <div class="px-4 space-y-8">
+                <!-- Section Maison -->
                 <div>
-                    <h2 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-2 mb-2">🏠 Maison</h2>
-                    <div id="liste-maison" class="bg-white dark:bg-[#2c2c2e] rounded-2xl divide-y divide-black/5 dark:divide-white/5 overflow-hidden shadow-md">
-                        </div>
+                    <h2 class="text-base font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-2 mb-3">🏠 Maison</h2>
+                    <div id="liste-maison" class="bg-white dark:bg-[#2c2c2e] rounded-2xl divide-y-2 divide-black/5 dark:divide-white/5 overflow-hidden shadow-md">
+                        <!-- Rempli par le script -->
+                    </div>
                 </div>
 
+                <!-- Section Bornes Publiques -->
                 <div>
-                    <h2 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-2 mb-2">⚡️ Bornes Publiques</h2>
-                    <div id="liste-publiques" class="bg-white dark:bg-[#2c2c2e] rounded-2xl divide-y divide-black/5 dark:divide-white/5 overflow-hidden shadow-md">
-                        </div>
+                    <h2 class="text-base font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-2 mb-3">⚡️ Bornes Publiques</h2>
+                    <div id="liste-publiques" class="bg-white dark:bg-[#2c2c2e] rounded-2xl divide-y-2 divide-black/5 dark:divide-white/5 overflow-hidden shadow-md">
+                        <!-- Rempli par le script -->
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- ONGLET 1 : STATISTIQUES -->
         <div id="onglet-stats" class="hidden space-y-6">
-            <header class="sticky top-0 bg-[#f2f2f7]/80 dark:bg-[#1c1c1e]/80 backdrop-blur-md z-30 h-16 flex items-center justify-center border-b border-black/5 dark:border-white/5">
-                <h1 class="text-xl font-bold tracking-tight">Statistiques</h1>
+            <header class="sticky top-0 bg-[#f2f2f7]/90 dark:bg-[#1c1c1e]/90 backdrop-blur-md z-30 h-20 flex items-center justify-center border-b-2 border-black/10 dark:border-white/10">
+                <h1 class="text-2xl font-black tracking-tight">Statistiques</h1>
             </header>
 
-            <div class="grid grid-cols-2 gap-4 px-4">
-                <div class="bg-white dark:bg-[#2c2c2e] p-5 rounded-2xl text-center shadow-md">
-                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400 block mb-1">Coût Total</span>
-                    <span id="stat-cout" class="text-3xl font-black text-green-500 block mt-1">0.00 €</span>
+            <!-- Cartes de statistiques GÉANTES -->
+            <div class="grid grid-cols-1 gap-4 px-4">
+                <div class="bg-white dark:bg-[#2c2c2e] p-6 rounded-2xl text-center shadow-md">
+                    <span class="text-base font-bold text-gray-500 dark:text-gray-400 block mb-1">Coût Total Accumulé</span>
+                    <span id="stat-cout" class="text-4xl font-black text-green-500 block mt-2">0.00 €</span>
                 </div>
-                <div class="bg-white dark:bg-[#2c2c2e] p-5 rounded-2xl text-center shadow-md">
-                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400 block mb-1">Énergie</span>
-                    <span id="stat-kwh" class="text-3xl font-black text-blue-500 block mt-1">0.0 kWh</span>
+                <div class="bg-white dark:bg-[#2c2c2e] p-6 rounded-2xl text-center shadow-md">
+                    <span class="text-base font-bold text-gray-500 dark:text-gray-400 block mb-1">Énergie Totale Délivrée</span>
+                    <span id="stat-kwh" class="text-4xl font-black text-blue-500 block mt-2">0.0 kWh</span>
                 </div>
             </div>
 
+            <!-- Graphique ChartJS -->
             <div class="px-4">
                 <div class="bg-white dark:bg-[#2c2c2e] p-5 rounded-2xl shadow-md">
-                    <canvas id="graphiqueRepart"></canvas>
+                    <canvas id="graphiqueRepart" class="max-h-64"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 inset-x-0 h-18 bg-[#f8f8f9] dark:bg-[#121212] border-t border-black/10 dark:border-white/10 flex justify-around items-center z-30 pb-[env(safe-area-inset-bottom)]">
-        <button onclick="changerOnglet(0)" id="btn-tab-0" class="flex flex-col items-center justify-center w-24 text-blue-500 py-2">
-            <span class="text-2xl">📋</span>
-            <span class="text-xs font-bold mt-1">Historique</span>
+    <!-- BARRE D'ONGLETS INFÉRIEURE TRÈS LARGE (TabView) -->
+    <nav class="fixed bottom-0 inset-x-0 h-20 bg-[#f8f8f9] dark:bg-[#121212] border-t-2 border-black/10 dark:border-white/10 flex justify-around items-center z-30 pb-[env(safe-area-inset-bottom)]">
+        <button onclick="changerOnglet(0)" id="btn-tab-0" class="flex flex-col items-center justify-center w-28 text-blue-500 py-2">
+            <span class="text-3xl">📋</span>
+            <span class="text-sm font-black mt-1">Historique</span>
         </button>
-        <button onclick="changerOnglet(1)" id="btn-tab-1" class="flex flex-col items-center justify-center w-24 text-gray-400 py-2">
-            <span class="text-2xl">📊</span>
-            <span class="text-xs font-bold mt-1">Statistiques</span>
+        <button onclick="changerOnglet(1)" id="btn-tab-1" class="flex flex-col items-center justify-center w-28 text-gray-400 py-2">
+            <span class="text-3xl">📊</span>
+            <span class="text-sm font-black mt-1">Stats</span>
         </button>
     </nav>
 
-    <div id="modale-editeur" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-4 backdrop-blur-xs">
-        <div class="bg-[#f2f2f7] dark:bg-[#1c1c1e] w-full max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
-            <div class="px-4 h-16 bg-white dark:bg-[#2c2c2e] flex justify-between items-center border-b border-black/5 dark:border-white/5 shrink-0">
-                <button onclick="fermerEditeur()" class="text-blue-500 font-bold text-base px-2 py-1">Annuler</button>
-                <h3 id="titre-editeur" class="font-extrabold text-base">Nouvelle Recharge</h3>
-                <button onclick="enregistrerRecharge()" class="text-blue-500 font-black text-base px-2 py-1">OK</button>
+    <!-- MODALE ÉDITEUR DE RECHARGE ULTRA-CONFORT (TAILLE BOUTONS ET TEXTES MAX) -->
+    <div id="modale-editeur" class="fixed inset-0 bg-black/70 z-50 hidden flex items-end sm:items-center justify-center p-3 backdrop-blur-md">
+        <div class="bg-[#f2f2f7] dark:bg-[#1c1c1e] w-full max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[95vh]">
+            <div class="px-4 h-20 bg-white dark:bg-[#2c2c2e] flex justify-between items-center border-b border-black/10 dark:border-white/10 shrink-0">
+                <button onclick="fermerEditeur()" class="bg-gray-200 dark:bg-black/40 text-gray-700 dark:text-gray-300 font-bold text-lg px-4 py-2.5 rounded-xl">Annuler</button>
+                <h3 id="titre-editeur" class="font-black text-lg">Recharge</h3>
+                <button onclick="enregistrerRecharge()" class="bg-blue-500 text-white font-black text-lg px-5 py-2.5 rounded-xl shadow-xs">OK</button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar text-base">
-                <div class="bg-white dark:bg-[#2c2c2e] rounded-xl p-4 flex justify-between items-center shadow-xs">
-                    <label class="font-bold text-base">Lieu de recharge</label>
-                    <select id="form-home" onchange="toggleFormLieu(this.value)" class="bg-gray-100 dark:bg-black/40 px-4 py-2 rounded-xl text-base font-bold outline-none border border-black/5 dark:border-white/5 h-12">
+            <div class="flex-1 overflow-y-auto p-4 space-y-5 no-scrollbar">
+                <!-- Lieu -->
+                <div class="bg-white dark:bg-[#2c2c2e] rounded-2xl p-4 flex justify-between items-center shadow-xs">
+                    <label class="font-black text-lg">Lieu</label>
+                    <select id="form-home" onchange="toggleFormLieu(this.value)" class="bg-gray-100 dark:bg-black/50 px-4 py-2 rounded-xl text-lg font-black outline-none border-2 border-black/10 dark:border-white/10 h-14 w-48 text-center">
                         <option value="true">🏠 Maison</option>
                         <option value="false">⚡️ En Borne</option>
                     </select>
                 </div>
 
-                <div id="box-select-operateur" class="bg-white dark:bg-[#2c2c2e] rounded-xl p-4 hidden justify-between items-center shadow-xs">
-                    <label class="font-bold text-base">Opérateur</label>
-                    <select id="form-operateur" onchange="calculerPrixAutomatique()" class="bg-gray-100 dark:bg-black/40 px-4 py-2 rounded-xl text-base font-bold outline-none max-w-[200px] border border-black/5 dark:border-white/5 h-12">
-                        </select>
+                <!-- Opérateur -->
+                <div id="box-select-operateur" class="bg-white dark:bg-[#2c2c2e] rounded-2xl p-4 hidden justify-between items-center shadow-xs">
+                    <label class="font-black text-lg">Borne</label>
+                    <select id="form-operateur" onchange="calculerPrixAutomatique()" class="bg-gray-100 dark:bg-black/50 px-4 py-2 rounded-xl text-lg font-black outline-none w-48 border-2 border-black/10 dark:border-white/10 h-14 text-center">
+                        <!-- Rempli en JS -->
+                    </select>
                 </div>
 
-                <div class="bg-white dark:bg-[#2c2c2e] rounded-xl divide-y divide-black/5 dark:divide-white/5 shadow-xs overflow-hidden">
-                    <div class="p-4 flex items-center justify-between">
-                        <span class="text-base font-bold">Énergie (kWh)</span>
-                        <input type="number" step="0.1" id="form-kwh" oninput="calculerPrixAutomatique()" placeholder="0.0" class="text-right bg-transparent outline-none w-36 font-black text-lg text-blue-500">
+                <!-- Formulaire à grosses entrées numériques -->
+                <div class="bg-white dark:bg-[#2c2c2e] rounded-2xl divide-y-2 divide-black/5 dark:divide-white/5 shadow-xs overflow-hidden">
+                    <div class="p-4 flex items-center justify-between h-18">
+                        <span class="text-lg font-black">Énergie (kWh)</span>
+                        <input type="number" step="0.1" id="form-kwh" oninput="calculerPrixAutomatique()" placeholder="0.0" class="text-right bg-transparent outline-none w-40 font-black text-2xl text-blue-500 h-12">
                     </div>
-                    <div class="p-4 flex items-center justify-between">
-                        <span class="text-base font-bold">Coût (€)</span>
-                        <input type="number" step="0.01" id="form-prix" placeholder="0.00" class="text-right bg-transparent outline-none w-36 font-black text-lg text-green-500">
+                    <div class="p-4 flex items-center justify-between h-18">
+                        <span class="text-lg font-black">Coût total (€)</span>
+                        <input type="number" step="0.01" id="form-prix" placeholder="0.00" class="text-right bg-transparent outline-none w-40 font-black text-2xl text-green-500 h-12">
                     </div>
-                    <div class="p-4 flex items-center justify-between">
-                        <span class="text-base font-bold">Distance (km)</span>
-                        <input type="number" id="form-km" placeholder="Optionnel" class="text-right bg-transparent outline-none w-36 font-bold text-base">
+                    <div class="p-4 flex items-center justify-between h-18">
+                        <span class="text-lg font-black">Compteur (km)</span>
+                        <input type="number" id="form-km" placeholder="Optionnel" class="text-right bg-transparent outline-none w-40 font-black text-xl h-12">
                     </div>
-                    <div class="p-4 flex items-center justify-between">
-                        <span class="text-base font-bold">Date</span>
-                        <input type="date" id="form-date" class="bg-transparent text-right font-semibold outline-none h-8">
+                    <div class="p-4 flex items-center justify-between h-18">
+                        <span class="text-lg font-black">Date</span>
+                        <input type="date" id="form-date" class="bg-transparent text-right font-bold text-lg outline-none h-12">
                     </div>
                 </div>
 
-                <button id="btn-supprimer" onclick="detruireRecharge()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-bold text-base hidden mt-2">
+                <button id="btn-supprimer" onclick="detruireRecharge()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black text-lg shadow-xs mt-4">
                     Supprimer cette recharge
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="modale-reglages" class="fixed inset-0 bg-black/60 z-40 hidden flex items-center justify-center p-4 backdrop-blur-xs">
-        <div class="bg-[#f2f2f7] dark:bg-[#1c1c1e] w-full max-w-md rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
-            <div class="px-4 h-16 bg-white dark:bg-[#2c2c2e] flex justify-between items-center border-b border-black/5 dark:border-white/5">
-                <h3 class="font-extrabold text-base">Réglages</h3>
-                <button onclick="fermerReglages()" class="text-blue-500 font-black text-base px-2 py-1">Fermer</button>
+    <!-- MODALE RÉGLAGES ET CONFIGURATIONS ULTRA-LISIBLES -->
+    <div id="modale-reglages" class="fixed inset-0 bg-black/70 z-40 hidden flex items-center justify-center p-3 backdrop-blur-md">
+        <div class="bg-[#f2f2f7] dark:bg-[#1c1c1e] w-full max-w-md rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="px-4 h-20 bg-white dark:bg-[#2c2c2e] flex justify-between items-center border-b-2 border-black/10 dark:border-white/10">
+                <h3 class="font-black text-lg">Configuration</h3>
+                <button onclick="fermerReglages()" class="bg-blue-500 text-white font-black text-base px-5 py-2.5 rounded-xl">Fermer</button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-4 space-y-5 no-scrollbar text-base">
+            <div class="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar">
+                <!-- Tarif Maison -->
                 <div>
-                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-2 block mb-1.5">Tarif Maison</label>
-                    <div class="bg-white dark:bg-[#2c2c2e] p-4 rounded-xl flex justify-between items-center shadow-xs">
-                        <span class="text-base font-bold">Heures Creuses</span>
+                    <label class="text-xs font-black text-gray-500 uppercase tracking-wider pl-2 block mb-2">Tarif Résidentiel</label>
+                    <div class="bg-white dark:bg-[#2c2c2e] p-4 rounded-2xl flex justify-between items-center shadow-xs">
+                        <span class="text-base font-black">Prix du kWh</span>
                         <div class="flex items-center gap-2">
-                            <input type="number" step="0.0001" id="reg-tarif-maison" class="w-28 text-right bg-gray-100 dark:bg-black/30 p-2 rounded-xl text-base font-black border border-black/5">
-                            <span class="text-xs text-gray-400 font-bold">/kWh</span>
+                            <input type="number" step="0.0001" id="reg-tarif-maison" class="w-32 text-center bg-gray-100 dark:bg-black/40 p-3 rounded-xl text-xl font-black border-2 border-black/10">
+                            <span class="text-sm font-bold text-gray-400">€</span>
                         </div>
                     </div>
                 </div>
 
+                <!-- Bornes Publiques -->
                 <div>
-                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-2 block mb-1.5">Mes Bornes Publiques</label>
-                    <div class="bg-white dark:bg-[#2c2c2e] rounded-xl p-4 space-y-4 shadow-xs">
-                        <div class="flex flex-col gap-2.5">
-                            <input type="text" id="new-op-nom" placeholder="Nom de la borne" class="bg-gray-100 dark:bg-black/30 px-4 py-2.5 rounded-xl text-sm font-semibold outline-none border border-black/5">
+                    <label class="text-xs font-black text-gray-500 uppercase tracking-wider pl-2 block mb-2">Réseaux Publics</label>
+                    <div class="bg-white dark:bg-[#2c2c2e] rounded-2xl p-4 space-y-4 shadow-xs">
+                        <div class="flex flex-col gap-3">
+                            <input type="text" id="new-op-nom" placeholder="Nom de l'opérateur (ex: Ionity)" class="bg-gray-100 dark:bg-black/40 px-4 py-3.5 rounded-xl text-base font-bold outline-none border-2 border-black/10 h-14">
                             <div class="flex gap-2">
-                                <input type="number" step="0.0001" id="new-op-tarif" placeholder="Tarif €/kWh" class="flex-1 bg-gray-100 dark:bg-black/30 px-4 py-2.5 rounded-xl text-sm font-semibold outline-none border border-black/5">
-                                <button onclick="ajouterOperateur()" class="bg-blue-500 text-white px-5 rounded-xl text-sm font-black">Ajouter</button>
+                                <input type="number" step="0.0001" id="new-op-tarif" placeholder="Prix €/kWh" class="flex-1 bg-gray-100 dark:bg-black/40 px-4 py-3.5 rounded-xl text-base font-bold outline-none border-2 border-black/10 h-14">
+                                <button onclick="ajouterOperateur()" class="bg-blue-500 text-white px-5 rounded-xl text-base font-black shadow-xs">Ajouter</button>
                             </div>
                         </div>
-                        <div id="liste-operateurs" class="divide-y divide-black/5 dark:divide-white/5 pt-1">
-                            </div>
+                        <div id="liste-operateurs" class="divide-y-2 divide-black/5 dark:divide-white/5 pt-2">
+                            <!-- Liste opérateurs -->
+                        </div>
                     </div>
                 </div>
 
+                <!-- Sauvegarde JSON -->
                 <div>
-                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wider pl-2 block mb-1.5">Sauvegarde</label>
-                    <div class="bg-white dark:bg-[#2c2c2e] rounded-xl divide-y divide-black/5 dark:divide-white/5 overflow-hidden shadow-xs">
-                        <button onclick="exporterDonnees()" class="w-full text-left p-4 text-base font-bold text-indigo-500 active:bg-black/5">📤 Exporter au format JSON</button>
-                        <label class="w-full text-left p-4 text-base font-bold text-emerald-500 active:bg-black/5 block cursor-pointer">
-                            📥 Importer depuis un fichier JSON
+                    <label class="text-xs font-black text-gray-500 uppercase tracking-wider pl-2 block mb-2">Données</label>
+                    <div class="bg-white dark:bg-[#2c2c2e] rounded-2xl divide-y-2 divide-black/5 dark:divide-white/5 overflow-hidden shadow-xs">
+                        <button onclick="exporterDonnees()" class="w-full text-left p-4.5 text-base font-black text-indigo-500 active:bg-black/5">📤 Exporter la sauvegarde (JSON)</button>
+                        <label class="w-full text-left p-4.5 text-base font-black text-emerald-500 active:bg-black/5 block cursor-pointer">
+                            📥 Importer une sauvegarde (JSON)
                             <input type="file" id="input-fichier-import" accept=".json" class="hidden" onchange="importerDonnees(this)">
                         </label>
                     </div>
@@ -182,7 +205,6 @@
         let operateurs = JSON.parse(localStorage.getItem('voltlog_operateurs')) || [];
         let tarifMaison = parseFloat(localStorage.getItem('voltlog_tarifMaison')) || 0.1500;
 
-        let ongletActuel = 0;
         let idRechargeEnEdition = null;
         let chartInstance = null;
 
@@ -196,12 +218,11 @@
         };
 
         function changerOnglet(index) {
-            ongletActuel = index;
             document.getElementById('onglet-historique').className = index === 0 ? 'block' : 'hidden';
             document.getElementById('onglet-stats').className = index === 1 ? 'block' : 'hidden';
             
-            document.getElementById('btn-tab-0').className = `flex flex-col items-center justify-center w-24 ${index === 0 ? 'text-blue-500' : 'text-gray-400'} py-2`;
-            document.getElementById('btn-tab-1').className = `flex flex-col items-center justify-center w-24 ${index === 1 ? 'text-blue-500' : 'text-gray-400'} py-2`;
+            document.getElementById('btn-tab-0').className = `flex flex-col items-center justify-center w-28 ${index === 0 ? 'text-blue-500' : 'text-gray-400'} py-2`;
+            document.getElementById('btn-tab-1').className = `flex flex-col items-center justify-center w-28 ${index === 1 ? 'text-blue-500' : 'text-gray-400'} py-2`;
             
             if (index === 1) genererStatistiques();
         }
@@ -219,13 +240,13 @@
             const publicList = triees.filter(r => !r.estAHome);
 
             if(maisonList.length === 0) {
-                divMaison.innerHTML = `<p class="p-5 text-sm text-gray-400 text-center">Aucune recharge maison</p>`;
+                divMaison.innerHTML = `<p class="p-6 text-base text-gray-400 text-center font-bold">Aucune recharge enregistrée</p>`;
             } else {
                 maisonList.forEach(r => divMaison.appendChild(creerLigneRecharge(r)));
             }
 
             if(publicList.length === 0) {
-                divPubliques.innerHTML = `<p class="p-5 text-sm text-gray-400 text-center">Aucune recharge publique</p>`;
+                divPubliques.innerHTML = `<p class="p-6 text-base text-gray-400 text-center font-bold">Aucune recharge enregistrée</p>`;
             } else {
                 publicList.forEach(r => divPubliques.appendChild(creerLigneRecharge(r)));
             }
@@ -235,12 +256,12 @@
             divOps.innerHTML = '';
             operateurs.sort((a,b) => a.nom.localeCompare(b.nom)).forEach(op => {
                 const item = document.createElement('div');
-                item.className = "flex justify-between items-center py-3 text-base border-b border-black/5 dark:border-white/5 last:border-none";
+                item.className = "flex justify-between items-center py-4 border-b-2 border-black/5 dark:border-white/5 last:border-none";
                 item.innerHTML = `
-                    <span class="font-bold">${op.nom}</span>
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm text-gray-400 font-bold">${parseFloat(op.tarif).toFixed(4)} €/kWh</span>
-                        <button onclick="supprimerOperateur('${op.nom}')" class="text-red-500 text-sm p-1">🗑️</button>
+                    <span class="font-black text-base">${op.nom}</span>
+                    <div class="flex items-center gap-4">
+                        <span class="text-base text-gray-400 font-black">${parseFloat(op.tarif).toFixed(4)} €/kWh</span>
+                        <button onclick="supprimerOperateur('${op.nom}')" class="bg-red-500/10 text-red-500 text-lg p-2.5 rounded-xl font-bold">🗑️</button>
                     </div>
                 `;
                 divOps.appendChild(item);
@@ -249,20 +270,20 @@
 
         function creerLigneRecharge(r) {
             const el = document.createElement('div');
-            el.className = "p-4 flex justify-between items-center active:bg-black/5 dark:active:bg-white/5 cursor-pointer transition-colors text-base";
+            el.className = "p-5 flex justify-between items-center active:bg-black/5 dark:active:bg-white/10 cursor-pointer transition-colors border-b border-black/5 dark:border-white/5 last:border-none";
             el.onclick = () => ouvrirEditeur(r.id);
             
             const dateObj = new Date(r.date);
             const dateStr = dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 
             el.innerHTML = `
-                <div class="flex flex-col">
-                    <span class="text-xl font-black">${parseFloat(r.kwh).toFixed(1)} <span class="text-sm font-semibold opacity-50">kWh</span></span>
-                    ${!r.estAHome && r.nomOperateur ? `<span class="text-xs font-bold text-blue-500 dark:text-blue-400 mt-1">⚡️ ${r.nomOperateur}</span>` : ''}
+                <div class="flex flex-col gap-1">
+                    <span class="text-2xl font-black tracking-tight">${parseFloat(r.kwh).toFixed(1)} <span class="text-sm font-bold opacity-60 text-blue-500">kWh</span></span>
+                    ${!r.estAHome && r.nomOperateur ? `<span class="text-xs font-black bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-md inline-block max-w-max">⚡️ ${r.nomOperateur}</span>` : ''}
                 </div>
-                <div class="flex flex-col items-end">
-                    <span class="text-2xl font-black text-green-500">${parseFloat(r.prix).toFixed(2)} €</span>
-                    <span class="text-xs font-bold text-gray-400 mt-1">${dateStr}</span>
+                <div class="flex flex-col items-end gap-1">
+                    <span class="text-3xl font-black text-green-500 tracking-tight">${parseFloat(r.prix).toFixed(2)} €</span>
+                    <span class="text-xs font-black text-gray-400 uppercase tracking-wider">${dateStr}</span>
                 </div>
             `;
             return el;
@@ -274,10 +295,10 @@
             
             const selectOp = document.getElementById('form-operateur');
             selectOp.innerHTML = operateurs.map(o => `<option value="${o.nom}">${o.nom}</option>`).join('');
-            if(operateurs.length === 0) selectOp.innerHTML = '<option value="">Aucun opérateur configuré</option>';
+            if(operateurs.length === 0) selectOp.innerHTML = '<option value="">Aucun</option>';
 
             if(id) {
-                document.getElementById('titre-editeur').innerText = "Modifier la Recharge";
+                document.getElementById('titre-editeur').innerText = "Modifier";
                 document.getElementById('btn-supprimer').classList.remove('hidden');
                 const r = recharges.find(x => x.id === id);
                 document.getElementById('form-home').value = r.estAHome ? "true" : "false";
@@ -287,7 +308,7 @@
                 document.getElementById('form-date').value = r.date.split('T')[0];
                 document.getElementById('form-operateur').value = r.nomOperateur || '';
             } else {
-                document.getElementById('titre-editeur').innerText = "Nouvelle Recharge";
+                document.getElementById('titre-editeur').innerText = "Ajouter";
                 document.getElementById('btn-supprimer').classList.add('hidden');
                 document.getElementById('form-home').value = "true";
                 document.getElementById('form-kwh').value = '';
@@ -366,7 +387,7 @@
             const tarif = parseFloat(document.getElementById('new-op-tarif').value) || 0;
             
             if(!nom) return;
-            if(operateurs.some(o => o.nom.toLowerCase() === nom.toLowerCase())) { alert("Cet opérateur existe déjà."); return; }
+            if(operateurs.some(o => o.nom.toLowerCase() === nom.toLowerCase())) { alert("Déjà configuré."); return; }
 
             operateurs.push({ nom, tarif });
             localStorage.setItem('voltlog_operateurs', JSON.stringify(operateurs));
@@ -382,16 +403,12 @@
             syncUI();
         }
 
-        // --- REGLAGES & IMPORTS / EXPORTS ---
+        // --- IMPORTS / EXPORTS ---
         function ouvrirReglages() { document.getElementById('modale-reglages').style.display = 'flex'; }
         function fermerReglages() { document.getElementById('modale-reglages').style.display = 'none'; syncUI(); }
 
         function exporterDonnees() {
-            const packageGlobal = {
-                tarifMaison: tarifMaison,
-                operateurs: operateurs,
-                recharges: recharges
-            };
+            const packageGlobal = { tarifMaison, operateurs, recharges };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(packageGlobal, null, 2));
             const dl = document.createElement('a');
             dl.setAttribute("href", dataStr);
@@ -405,25 +422,21 @@
             reader.onload = function(e) {
                 try {
                     const sauvegarde = JSON.parse(e.target.result);
-                    
                     if(sauvegarde.tarifMaison !== undefined) {
                         tarifMaison = parseFloat(sauvegarde.tarifMaison);
                         localStorage.setItem('voltlog_tarifMaison', tarifMaison);
                         document.getElementById('reg-tarif-maison').value = tarifMaison;
                     }
-                    if(sauvegarde.operateurs) {
-                        operateurs = sauvegarde.operateurs;
-                        localStorage.setItem('voltlog_operateurs', JSON.stringify(operateurs));
-                    }
-                    if(sauvegarde.recharges) {
-                        recharges = sauvegarde.recharges;
-                        localStorage.setItem('voltlog_recharges', JSON.stringify(recharges));
-                    }
+                    if(sauvegarde.operateurs) localStorage.setItem('voltlog_operateurs', JSON.stringify(sauvegarde.operateurs));
+                    if(sauvegarde.recharges) localStorage.setItem('voltlog_recharges', JSON.stringify(sauvegarde.recharges));
+                    
+                    recharges = sauvegarde.recharges || recharges;
+                    operateurs = sauvegarde.operateurs || operateurs;
                     
                     syncUI();
-                    alert("Importation réussie ✓");
+                    alert("Importation validée ! ✓");
                     fermerReglages();
-                } catch(err) { alert("Fichier JSON invalide."); }
+                } catch(err) { alert("Fichier corrompu."); }
             };
             reader.readAsText(file);
         }
@@ -449,10 +462,9 @@
                 data: {
                     labels: ['Maison', 'Bornes'],
                     datasets: [{
-                        label: 'Coût (€)',
                         data: [coutMaison, coutBornes],
                         backgroundColor: ['#34c759', '#007aff'],
-                        borderRadius: 10
+                        borderRadius: 12
                     }]
                 },
                 options: {
@@ -461,12 +473,12 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' },
-                            ticks: { font: { size: 13, weight: 'bold' }, color: isDark ? '#fff' : '#000' }
+                            grid: { color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)' },
+                            ticks: { font: { size: 14, weight: 'bold' }, color: isDark ? '#fff' : '#000' }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { font: { size: 14, weight: 'bold' }, color: isDark ? '#fff' : '#000' }
+                            ticks: { font: { size: 16, weight: 'black' }, color: isDark ? '#fff' : '#000' }
                         }
                     }
                 }
