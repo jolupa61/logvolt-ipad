@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link class="apple-touch-icon" rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/510/ffffff/charging-station.png">
+    
+    <title>VoltLog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-[#f2f2f7] dark:bg-[#1c1c1e] text-black dark:text-white antialiased flex flex-col h-full overflow-hidden pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+
+    <div class="flex-1 overflow-y-auto no-scrollbar pb-16" id="contenu-principal">
+        
+        <div id="onglet-historique" class="block space-y-6">
+            <header class="sticky top-0 bg-[#f2f2f7]/80 dark:bg-[#1c1c1e]/80 backdrop-blur-md z-30 px-4 h-14 flex justify-between items-center border-b border-black/5 dark:border-white/5">
+                <button onclick="ouvrirReglages()" class="text-blue-500 text-xl p-2">⚙️</button>
+                <h1 class="text-lg font-bold tracking-tight">VoltLog</h1>
+                <button onclick="ouvrirEditeur()" class="text-blue-500 text-2xl p-2">➕</button>
+            </header>
+
+            <div class="px-4 space-y-6">
+                <div>
+                    <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-2 mb-2">🏠 Maison</h2>
+                    <div id="liste-maison" class="bg-white dark:bg-[#2c2c2e] rounded-xl divide-y divide-black/5 dark:divide-white/5 overflow-hidden shadow-xs">
+                        </div>
+                </div>
+
+                <div>
+                    <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider pl-2 mb-2">⚡️ Bornes Publiques</h2>
+                    <div id="liste-publiques" class="bg-white dark:bg-[#2c2c2e] rounded-xl divide-y divide-black/5 dark:divide-white/5 overflow-hidden shadow-xs">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="onglet-stats" class="hidden space-y-6">
+            <header class="sticky top-0 bg-[#f2f2f7]/80 dark:bg-[#1c1c1e]/80 backdrop-blur-md z-30 h-14 flex items-center justify-center border-b border-black/5 dark:border-white/5">
+                <h1 class="text-lg font-bold tracking-tight">Statistiques</h1>
+            </header>
+
+            <div class="grid grid-cols-2 gap-4 px-4">
+                <div class="bg-white dark:bg-[#2c2c2e] p-4 rounded-xl text-center shadow-xs">
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Coût Total</span>
+                    <span id="stat-cout" class="text-2xl font-bold text-green-500">0.00 €</span>
+                </div>
+                <div class="bg-white dark:bg-[#2c2c2e] p-4 rounded-xl text-center shadow-xs">
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Énergie</span>
+                    <span id="stat-kwh" class="text-2xl font-bold text-blue-500">0.0 kWh</span>
+                </div>
+            </div>
+
+            <div class="px-4">
+                <div class="bg-white dark:bg-[#2c2c2e] p-4 rounded-xl shadow-xs">
+                    <canvas id="graphiqueRepart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 inset-x-0 h-16 bg-[#f8f8f9] dark:bg-[#121212] border-t border-black/10 dark:border-white/10 flex justify-around items-center z-30 pb-[env(safe-area-inset-bottom)]">
+        <button onclick="changerOnglet(0)" id="btn-tab-0" class="flex flex-col items-center justify-center w-20 text-blue-500">
+            <span class="text-xl">📋</span>
+            <span class="text-[10px] font-medium mt-0.5">Historique</span>
+        </button>
+        <button onclick="changerOnglet(1)" id="btn-tab-1" class="flex flex-col items-center justify-center w-20 text-gray-400">
+            <span class="text-xl">📊</span>
+            <span class="text-[10px] font-medium mt-0.5">Statistiques</span>
+        </button>
+    </nav>
+
+    <div id="modale-editeur" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-4 backdrop-blur-xs">
+        <div class="bg-[#f2f2f7] dark:bg-[#1c1c1e] w-full max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="px-4 h-14 bg-white dark:bg-[#2c2c2e] flex justify-between items-center border-b border-black/5 dark:border-white/5">
+                <button onclick="fermerEditeur()" class="text-blue-500 font-medium">Annuler</button>
+                <h3 id="titre-editeur" class="font-bold">Nouvelle Recharge</h3>
+                <button onclick="enregistrerRecharge()" class="text-blue-500 font-bold">OK</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+                <div class="bg-white dark:bg-[#2c2c2e] rounded-xl p-3 flex justify-between items-center">
+                    <label class="font-medium text-sm">Lieu de recharge</label>
+                    <select id="form-home" onchange="toggleFormLieu(this.value)" class="bg-gray-100 dark:bg-black/20 px-3 py-1.5 rounded-lg text-sm outline-none">
+                        <option value="true">🏠 Maison</option>
+                        <option value="false">⚡️ Borne Publique</option>
+                    </select>
+                </div>
+
+                <div id="box-select-operateur" class="bg-white dark:bg-[#2c2c2e] rounded-xl p-3 hidden justify-between items-center">
+                    <label class="font-medium text-sm">Opérateur</label>
+                    <select id="form-operateur" onchange="calculerPrixAutomatique()" class="bg-gray-100 dark:bg-black/20 px-3 py-1.5 rounded-lg text-sm outline-none max-w-[200px]">
+                        </select>
+                </div>
+
+                <div class="bg-white dark:bg-[#2c2c2e] rounded-xl divide-y divide-black/5 dark:divide-white/5">
+                    <div class="p-3 flex items-center justify-between">
+                        <span class="text-sm font-medium">Énergie (kWh)</span>
+                        <input type="number" step="0.1" id="form-kwh" oninput="calculerPrixAutomatique()" placeholder="0.0" class="text-right bg-transparent outline-none w-32 font-semibold">
+                    </div>
+                    <div class="p-3 flex items-center justify-between">
+                        <span class="text-sm font-medium">Coût (€)</span>
+                        <input type="number" step="0.01" id="form-prix" placeholder="0.00" class="text-right bg-transparent outline-none w-32 font-semibold text-green-500">
+                    </div>
+                    <div class="p-3 flex items-center justify-between">
+                        <span class="text-sm font-medium">Kilométrage (km)</span>
+                        <input type="number" id="form-km" placeholder="Optionnel" class="text-right bg-transparent outline-none w-32 font-semibold">
+                    </div>
+                    <div class="p-3 flex items-center justify-between">
+                        <span class="text-sm font-medium">Date</span>
+                        <input type="date" id="form-date" class="bg-transparent text-right outline-none">
+                    </div>
+                </div>
+
+                <button id="btn-supprimer" onclick="detruireRecharge()" class="w-full bg-red-500/10 text-red-500 py-3.5 rounded-xl font-semibold text-sm hidden">
+                    Supprimer la recharge
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modale-reglages" class="fixed inset-0 bg-black/60 z-40 hidden flex items-center justify-center p-4 backdrop-blur-xs">
+        <div class="bg-[#f2f2f7] dark:bg-[#1c1c1e] w-full max-w-md rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="px-4 h-14 bg-white dark:bg-[#2c2c2e] flex justify-between items-center border-b border-black/5 dark:border-white/5">
+                <h3 class="font-bold text-base">Réglages</h3>
+                <button onclick="fermerReglages()" class="text-blue-500 font-bold">Fermer</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-5 no-scrollbar">
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider pl-2 block mb-1.5">Tarif Maison</label>
+                    <div class="bg-white dark:bg-[#2c2c2e] p-3 rounded-xl flex justify-between items-center">
+                        <span class="text-sm font-medium">Heures Creuses</span>
+                        <div class="flex items-center gap-2">
+                            <input type="number" step="0.0001" id="reg-tarif-maison" class="w-24 text-right bg-gray-100 dark:bg-black/20 p-1.5 rounded-lg text-sm font-bold">
+                            <span class="text-xs text-gray-400 font-bold">/kWh</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider pl-2 block mb-1.5">Mes Bornes Publiques</label>
+                    <div class="bg-white dark:bg-[#2c2c2e] rounded-xl p-3 space-y-3">
+                        <div class="flex gap-2">
+                            <input type="text" id="new-op-nom" placeholder="Nom" class="flex-1 bg-gray-100 dark:bg-black/20 px-3 py-2 rounded-lg text-xs outline-none">
+                            <input type="number" step="0.0001" id="new-op-tarif" placeholder="Tarif/kWh" class="w-24 bg-gray-100 dark:bg-black/20 px-3 py-2 rounded-lg text-xs outline-none">
+                            <button onclick="ajouterOperateur()" class="bg-blue-500 text-white px-3 py-2 rounded-lg text-xs font-bold">Ajouter</button>
+                        </div>
+                        <div id="liste-operateurs" class="divide-y divide-black/5 dark:divide-white/5 pt-1">
+                            </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider pl-2 block mb-1.5">Sauvegarde</label>
+                    <div class="bg-white dark:bg-[#2c2c2e] rounded-xl divide-y divide-black/5 dark:divide-white/5 overflow-hidden">
+                        <button onclick="exporterDonnees()" class="w-full text-left p-3.5 text-sm font-medium text-indigo-500 active:bg-black/5">📤 Exporter au format JSON</button>
+                        <label class="w-full text-left p-3.5 text-sm font-medium text-emerald-500 active:bg-black/5 block cursor-pointer">
+                            📥 Importer depuis un fichier JSON
+                            <input type="file" id="input-fichier-import" accept=".json" class="hidden" onchange="importerDonnees(this)">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DONNÉES LOCALSTORAGE ---
+        let recharges = JSON.parse(localStorage.getItem('voltlog_recharges')) || [];
+        let operateurs = JSON.parse(localStorage.getItem('voltlog_operateurs')) || [];
+        let tarifMaison = parseFloat(localStorage.getItem('voltlog_tarifMaison')) || 0.1500;
+
+        let ongletActuel = 0;
+        let idRechargeEnEdition = null;
+        let chartInstance = null;
+
+        window.onload = function() {
+            document.getElementById('reg-tarif-maison').value = tarifMaison;
+            document.getElementById('reg-tarif-maison').addEventListener('input', (e) => {
+                tarifMaison = parseFloat(e.target.value) || 0;
+                localStorage.setItem('voltlog_tarifMaison', tarifMaison);
+            });
+            syncUI();
+        };
+
+        function changerOnglet(index) {
+            ongletActuel = index;
+            document.getElementById('onglet-historique').className = index === 0 ? 'block' : 'hidden';
+            document.getElementById('onglet-stats').className = index === 1 ? 'block' : 'hidden';
+            
+            document.getElementById('btn-tab-0').className = `flex flex-col items-center justify-center w-20 ${index === 0 ? 'text-blue-500' : 'text-gray-400'}`;
+            document.getElementById('btn-tab-1').className = `flex flex-col items-center justify-center w-20 ${index === 1 ? 'text-blue-500' : 'text-gray-400'}`;
+            
+            if (index === 1) genererStatistiques();
+        }
+
+        // --- INTERFACE PRINCIPALE ---
+        function syncUI() {
+            const divMaison = document.getElementById('liste-maison');
+            const divPubliques = document.getElementById('liste-publiques');
+            
+            divMaison.innerHTML = '';
+            divPubliques.innerHTML = '';
+
+            // Tri par date décroissante (order: .reverse)
+            const triees = [...recharges].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const maisonList = triees.filter(r => r.estAHome);
+            const publicList = triees.filter(r => !r.estAHome);
+
+            if(maisonList.length === 0) {
+                divMaison.innerHTML = `<p class="p-4 text-xs text-gray-400 text-center">Aucune recharge maison</p>`;
+            } else {
+                maisonList.forEach(r => divMaison.appendChild(creerLigneRecharge(r)));
+            }
+
+            if(publicList.length === 0) {
+                divPubliques.innerHTML = `<p class="p-4 text-xs text-gray-400 text-center">Aucune recharge publique</p>`;
+            } else {
+                publicList.forEach(r => divPubliques.appendChild(creerLigneRecharge(r)));
+            }
+
+            // Sync Réglages Opérateurs
+            const divOps = document.getElementById('liste-operateurs');
+            divOps.innerHTML = '';
+            operateurs.sort((a,b) => a.nom.localeCompare(b.nom)).forEach(op => {
+                const item = document.createElement('div');
+                item.className = "flex justify-between items-center py-2.5 text-sm";
+                item.innerHTML = `
+                    <span class="font-medium">${op.nom}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-gray-400 font-semibold">${parseFloat(op.tarif).toFixed(4)} €/kWh</span>
+                        <button onclick="supprimerOperateur('${op.nom}')" class="text-red-500 text-xs">🗑️</button>
+                    </div>
+                `;
+                divOps.appendChild(item);
+            });
+        }
+
+        function creerLigneRecharge(r) {
+            const el = document.createElement('div');
+            el.className = "p-3.5 flex justify-between items-center active:bg-black/5 dark:active:bg-white/5 cursor-pointer transition-colors text-base";
+            el.onclick = () => ouvrirEditeur(r.id);
+            
+            const dateObj = new Date(r.date);
+            const dateStr = dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            el.innerHTML = `
+                <div class="flex flex-col">
+                    <span class="font-bold">${parseFloat(r.kwh).toFixed(1)} kWh</span>
+                    ${!r.estAHome && r.nomOperateur ? `<span class="text-xs text-gray-400 mt-0.5">⚡️ ${r.nomOperateur}</span>` : ''}
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="font-extrabold text-green-500">${parseFloat(r.prix).toFixed(2)} €</span>
+                    <span class="text-[11px] text-gray-400 mt-0.5">${dateStr}</span>
+                </div>
+            `;
+            return el;
+        }
+
+        // --- ENREGISTREMENT / ÉDITION ---
+        function ouvrirEditeur(id = null) {
+            idRechargeEnEdition = id;
+            
+            // Remplir le selecteur d'opérateurs dans l'éditeur
+            const selectOp = document.getElementById('form-operateur');
+            selectOp.innerHTML = operateurs.map(o => `<option value="${o.nom}">${o.nom}</option>`).join('');
+            if(operateurs.length === 0) selectOp.innerHTML = '<option value="">Aucun opérateur configuré</option>';
+
+            if(id) {
+                document.getElementById('titre-editeur').innerText = "Modifier la Recharge";
+                document.getElementById('btn-supprimer').classList.remove('hidden');
+                const r = recharges.find(x => x.id === id);
+                document.getElementById('form-home').value = r.estAHome ? "true" : "false";
+                document.getElementById('form-kwh').value = r.kwh;
+                document.getElementById('form-prix').value = r.prix;
+                document.getElementById('form-km').value = r.km || '';
+                document.getElementById('form-date').value = r.date.split('T')[0];
+                document.getElementById('form-operateur').value = r.nomOperateur || '';
+            } else {
+                document.getElementById('titre-editeur').innerText = "Nouvelle Recharge";
+                document.getElementById('btn-supprimer').classList.add('hidden');
+                document.getElementById('form-home').value = "true";
+                document.getElementById('form-kwh').value = '';
+                document.getElementById('form-prix').value = '';
+                document.getElementById('form-km').value = '';
+                document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
+            }
+
+            toggleFormLieu(document.getElementById('form-home').value);
+            document.getElementById('modale-editeur').style.display = 'flex';
+        }
+
+        function fermerEditeur() { document.getElementById('modale-editeur').style.display = 'none'; }
+
+        function toggleFormLieu(val) {
+            const boxOp = document.getElementById('box-select-operateur');
+            if (val === "false") {
+                boxOp.style.display = 'flex';
+            } else {
+                boxOp.style.display = 'none';
+            }
+            calculerPrixAutomatique();
+        }
+
+        function calculerPrixAutomatique() {
+            const isHome = document.getElementById('form-home').value === "true";
+            const kwh = parseFloat(document.getElementById('form-kwh').value) || 0;
+            
+            if(isHome) {
+                document.getElementById('form-prix').value = (kwh * tarifMaison).toFixed(2);
+            } else {
+                const nomOp = document.getElementById('form-operateur').value;
+                const op = operateurs.find(o => o.nom === nomOp);
+                if(op) {
+                    document.getElementById('form-prix').value = (kwh * op.tarif).toFixed(2);
+                }
+            }
+        }
+
+        function enregistrerRecharge() {
+            const estAHome = document.getElementById('form-home').value === "true";
+            const kwh = parseFloat(document.getElementById('form-kwh').value) || 0;
+            const prix = parseFloat(document.getElementById('form-prix').value) || 0;
+            const km = parseInt(document.getElementById('form-km').value) || null;
+            const date = document.getElementById('form-date').value;
+            const nomOperateur = estAHome ? null : document.getElementById('form-operateur').value;
+
+            if (idRechargeEnEdition) {
+                let r = recharges.find(x => x.id === idRechargeEnEdition);
+                if(r) {
+                    r.estAHome = estAHome; r.kwh = kwh; r.prix = prix; r.km = km; r.date = new Date(date).toISOString(); r.nomOperateur = nomOperateur;
+                }
+            } else {
+                recharges.push({
+                    id: 'id_' + Date.now(),
+                    date: new Date(date).toISOString(),
+                    kwh, prix, km, estAHome, nomOperateur
+                });
+            }
+
+            localStorage.setItem('voltlog_recharges', JSON.stringify(recharges));
+            fermerEditeur();
+            syncUI();
+        }
+
+        function detruireRecharge() {
+            recharges = recharges.filter(x => x.id !== idRechargeEnEdition);
+            localStorage.setItem('voltlog_recharges', JSON.stringify(recharges));
+            fermerEditeur();
+            syncUI();
+        }
+
+        // --- GESTION DES OPÉRATEURS ---
+        function ajouterOperateur() {
+            const nom = document.getElementById('new-op-nom').value.trim();
+            const tarif = parseFloat(document.getElementById('new-op-tarif').value) || 0;
+            
+            if(!nom) return;
+            if(operateurs.some(o => o.nom.toLowerCase() === nom.toLowerCase())) { alert("Cet opérateur existe déjà."); return; }
+
+            operateurs.push({ nom, tarif });
+            localStorage.setItem('voltlog_operateurs', JSON.stringify(operateurs));
+            
+            document.getElementById('new-op-nom').value = '';
+            document.getElementById('new-op-tarif').value = '';
+            syncUI();
+        }
+
+        function supprimerOperateur(nom) {
+            operateurs = operateurs.filter(o => o.nom !== nom);
+            localStorage.setItem('voltlog_operateurs', JSON.stringify(operateurs));
+            syncUI();
+        }
+
+        // --- REGLAGES & IMPORTS / EXPORTS ---
+        function ouvrirReglages() { document.getElementById('modale-reglages').style.display = 'flex'; }
+        function fermerReglages() { document.getElementById('modale-reglages').style.display = 'none'; syncUI(); }
+
+        function exporterDonnees() {
+            const packageGlobal = {
+                tarifMaison: tarifMaison,
+                operateurs: operateurs,
+                recharges: recharges
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(packageGlobal, null, 2));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", "VoltLog_Backup.json");
+            document.body.appendChild(dl); dl.click(); dl.remove();
+        }
+
+        function importerDonnees(input) {
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const sauvegarde = JSON.parse(e.target.result);
+                    
+                    if(sauvegarde.tarifMaison !== undefined) {
+                        tarifMaison = parseFloat(sauvegarde.tarifMaison);
+                        localStorage.setItem('voltlog_tarifMaison', tarifMaison);
+                        document.getElementById('reg-tarif-maison').value = tarifMaison;
+                    }
+                    if(sauvegarde.operateurs) {
+                        operateurs = sauvegarde.operateurs;
+                        localStorage.setItem('voltlog_operateurs', JSON.stringify(operateurs));
+                    }
+                    if(sauvegarde.recharges) {
+                        recharges = sauvegarde.recharges;
+                        localStorage.setItem('voltlog_recharges', JSON.stringify(recharges));
+                    }
+                    
+                    syncUI();
+                    alert("Importation réussie ✓");
+                    fermerReglages();
+                } catch(err) { alert("Fichier JSON invalide."); }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- ONGLET STATISTIQUES (Chart.js) ---
+        function genererStatistiques() {
+            const totalCout = recharges.reduce((acc, r) => acc + r.prix, 0);
+            const totalKwh = recharges.reduce((acc, r) => acc + r.kwh, 0);
+
+            document.getElementById('stat-cout').innerText = totalCout.toFixed(2) + " €";
+            document.getElementById('stat-kwh').innerText = totalKwh.toFixed(1) + " kWh";
+
+            const coutMaison = recharges.filter(r => r.estAHome).reduce((acc, r) => acc + r.prix, 0);
+            const coutBornes = recharges.filter(r => !r.estAHome).reduce((acc, r) => acc + r.prix, 0);
+
+            // Rendu du graphique Chart.js (Équivalent du struct Chart SwiftUI)
+            const ctx = document.getElementById('graphiqueRepart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
+            const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Maison', 'Bornes'],
+                    datasets: [{
+                        label: 'Coût (€)',
+                        data: [coutMaison, coutBornes],
+                        backgroundColor: ['#34c759', '#007aff'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' },
+                            ticks: { color: isDark ? '#fff' : '#000' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: isDark ? '#fff' : '#000' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
